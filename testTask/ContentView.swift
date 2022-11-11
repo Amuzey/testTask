@@ -6,16 +6,58 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct ContentView: View {
+    
+    @State var address = ""
+    @State var checkpoints = [MKPointAnnotation]()
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+            MapView(checkpoints: $checkpoints)
+                .ignoresSafeArea()
+            VStack(spacing: 40) {
+                HStack {
+                    TextField("Введите адрес", text: $address)
+                    Button("Add") {
+                        setupPlacemarck(addressPlace: address)
+                    }
+                }
+                HStack {
+                    Spacer()
+                    Button("Route") {
+                        
+                    }
+                    Spacer()
+                    Button("Reset") {
+                    }
+                    Spacer()
+                }
+            }
+            .padding(20)
         }
-        .padding()
+    }
+    
+     func setupPlacemarck(addressPlace: String) {
+    
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(addressPlace) { [self] placemarcks, error in
+            
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let placemarcks = placemarcks else { return }
+            let placemarck = placemarcks.first
+            let anotation = MKPointAnnotation()
+            anotation.title = addressPlace
+            guard let placemarckLocation = placemarck?.location else { return }
+            anotation.coordinate = placemarckLocation.coordinate
+            
+            checkpoints.append(anotation)
+        }
     }
 }
 
